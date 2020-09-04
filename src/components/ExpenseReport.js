@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { connect } from "react-redux";
+import { formatNumberWithCommas, dateToLocalISOString } from "./Utils";
 
 const mapStateToProps = state => {
     console.log("Entry types:", state.types);
@@ -12,10 +13,6 @@ const mapStateToProps = state => {
     };
 };
 
-function numberWithCommas(x) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
-
 class ConnectedExpenseReport extends React.Component {
     constructor() {
         super();
@@ -24,10 +21,11 @@ class ConnectedExpenseReport extends React.Component {
 
         let month = new Date();
         month.setDate(1);
-        for (let i = 0; i < 5; i++){
-            this.months.push(month.toISOString().substring(0,7));
+        for (let i = 0; i < 6; i++){
+            this.months.push(dateToLocalISOString(month).substring(0,7));
             month.setMonth(month.getMonth()-1);
         }
+        console.log("Months:", this.months);
     }
 
     handleGenerate() {
@@ -51,14 +49,14 @@ class ConnectedExpenseReport extends React.Component {
         for (const month of this.months) {
             let expenses = this.props.expenses.filter(expense => expense.date.substring(0,7) === month);
             for (const rowId in rows) {
-                rows[rowId].amounts.push(numberWithCommas(expenses.reduce((subtotal, expense) => {
+                rows[rowId].amounts.push(expenses.reduce((subtotal, expense) => {
                     if (expense.type === rows[rowId].type)
                         return subtotal + Number(expense.amount);
                     return subtotal;
-                }, 0).toFixed(2)));
+                }, 0).toFixed(2));
             }
 
-            totals.amounts.push(numberWithCommas(expenses.reduce((subtotal, expense) => subtotal + Number(expense.amount),0).toFixed(2)));
+            totals.amounts.push(expenses.reduce((subtotal, expense) => subtotal + Number(expense.amount),0).toFixed(2));
         }
         rows.push(totals);
         return rows;
@@ -89,16 +87,17 @@ class ConnectedExpenseReport extends React.Component {
                     return subtotal;
                 }, 0));
 
-                rows[rowId].amounts.push(numberWithCommas(expenses.reduce((subtotal, expense) => {
+                rows[rowId].amounts.push(expenses.reduce((subtotal, expense) => {
                     if (expense.item === rows[rowId].item)
                         return subtotal + Number(expense.amount);
                     return subtotal;
-                }, 0).toFixed(2)));
+                }, 0).toFixed(2));
             }
 
             totals.qtys.push("N/A");
-            totals.amounts.push(numberWithCommas(expenses.reduce((subtotal, expense) => subtotal + Number(expense.amount),0).toFixed(2)));
+            totals.amounts.push(expenses.reduce((subtotal, expense) => subtotal + Number(expense.amount),0).toFixed(2));
         }
+        rows.sort((a,b) => (b.amounts[0] - a.amounts[0]));
         rows.push(totals);
         return rows;
     }
@@ -119,7 +118,7 @@ class ConnectedExpenseReport extends React.Component {
             <tr key={row.id}>
                 <td>{row.type}</td>
                 {
-                    row.amounts.map(amount => (<td key={colId++}>{amount}</td>))
+                    row.amounts.map(amount => (<td key={colId++}>{formatNumberWithCommas(amount)}</td>))
                 }
             </tr>
         );
@@ -132,7 +131,7 @@ class ConnectedExpenseReport extends React.Component {
                 <td>{row.item}</td>
                 {
                     //row.qtys.map(qty => (<td key={colId++}>{qty}</td>))
-                    row.amounts.map(amount => (<td key={colId++}>{amount}</td>))
+                    row.amounts.map(amount => (<td key={colId++}>{formatNumberWithCommas(amount)}</td>))
                 }
             </tr>
         );

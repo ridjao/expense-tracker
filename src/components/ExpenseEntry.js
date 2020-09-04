@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import { connect } from "react-redux";
 import { addExpense, addType, addItem } from "../actions";
+import { dateToLocalISOString } from "./Utils"
 
 import { v4 as uuidv4 } from 'uuid';
 
@@ -31,7 +32,7 @@ class ConnectedExpenseEntry extends React.Component {
             id: 0,
             type: "",
             amount: "",
-            date: (new Date()).toISOString().substr(0,10),
+            date: dateToLocalISOString(new Date()).substr(0,10),
             item: "",
             qty: 1
         };

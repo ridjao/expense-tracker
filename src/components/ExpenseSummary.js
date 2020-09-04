@@ -5,6 +5,7 @@ import { removeExpense, reloadLogs } from "../actions";
 import { clearExpenses } from "../actions";
 
 import Repository from "./Repository";
+import { formatNumberWithCommas } from "./Utils";
 
 const mapStateToProps = state => {
     console.log("Expenses:", state.expenses);
@@ -18,10 +19,6 @@ function mapDispatchToProps(dispatch) {
         clearExpenses: () => dispatch(clearExpenses()),
         reloadLogs: (logs) => dispatch(reloadLogs(logs))
     };
-}
-
-function numberWithCommas(x) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 class ConnectedExpenseSummary extends React.Component {
@@ -45,7 +42,7 @@ class ConnectedExpenseSummary extends React.Component {
     }
 
     render() {
-        const total = numberWithCommas(this.props.expenses.reduce((subtotal, expense) => subtotal + Number(expense.amount), 0).toFixed(2));
+        const total = formatNumberWithCommas(this.props.expenses.reduce((subtotal, expense) => subtotal + Number(expense.amount), 0).toFixed(2));
         return (
             <div>
                 <table>
